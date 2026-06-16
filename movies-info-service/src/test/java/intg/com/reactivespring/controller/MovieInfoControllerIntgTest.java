@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
- class MovieInfoControllerTest {
+ class MovieInfoControllerIntgTest {
 
     @Autowired
     MovieInfoRepository movieInfoRepository;

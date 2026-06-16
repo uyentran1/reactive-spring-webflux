@@ -40,9 +40,9 @@ dependencies {
 	}
 }
 
-tasks.named('test') {
+tasks.withType(Test).configureEach {
 	useJUnitPlatform()
-	jvmArgs = ["-javaagent:${configurations.mockitoAgent.asPath}"]
+	jvmArgs += ["-javaagent:${configurations.mockitoAgent.singleFile}"]
 }
 
 

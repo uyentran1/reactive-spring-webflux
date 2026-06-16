@@ -36,7 +36,7 @@ public class MovieInfoService {
                 });
     }
 
-    public Mono<Void> deleteMovieById(String id) {
+    public Mono<Void> deleteMovieInfoById(String id) {
         return movieInfoRepository.deleteById(id);
     }
 

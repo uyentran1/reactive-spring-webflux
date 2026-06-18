@@ -1,6 +1,7 @@
 package com.reactivespring.controller;
 
 import com.reactivespring.domain.MovieInfo;
+import com.reactivespring.exceptionhandler.GlobalErrorHandler;
 import com.reactivespring.service.MovieInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ public class MovieInfoControllerUnitTest {
     void setup() {
         movieInfoController = new MovieInfoController(movieInfoServiceMock);
         webTestClient = WebTestClient.bindToController(movieInfoController)
+                .controllerAdvice(new GlobalErrorHandler())
                 .build();
     }
 
@@ -102,6 +104,28 @@ public class MovieInfoControllerUnitTest {
         assertNotNull(savedMovieInfo);
         assertNotNull(savedMovieInfo.getMovieInfoId());
         assertEquals("mockId", savedMovieInfo.getMovieInfoId());
+    }
+
+    @Test
+    void addMovieInfo_validation() {
+        var movieInfo = new MovieInfo(null, "", -2005, List.of(
+                ""), LocalDate.parse("2005-06-15"));
+
+        webTestClient.post()
+            .uri(MOVIE_INFO_URL)
+            .bodyValue(movieInfo)
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody(String.class)
+            .consumeWith(result -> {
+                var responseBody = result.getResponseBody();
+                System.out.println("responseBody: " + responseBody);
+                var expectedErrorMessage = "movieInfo.cast must be present, " +
+                        "movieInfo.name must be present, " +
+                        "movieInfo.year must be a positive value";
+                assert responseBody != null;
+                assertEquals(expectedErrorMessage, responseBody);
+            });
     }
 
     @Test

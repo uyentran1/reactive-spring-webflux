@@ -70,6 +70,32 @@ class MovieInfoRepositoryIntgTest {
     }
 
     @Test
+    void findByName() {
+        String name = "Dark Knight Rises";
+
+        var movieInfoMono = movieInfoRepository.findByName(name);
+
+        StepVerifier.create(movieInfoMono)
+                .assertNext(movieInfo -> {
+                    assertEquals("abc", movieInfo.getMovieInfoId());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void findByYear() {
+        Integer year = 2005;
+
+        var movieInfoFlux = movieInfoRepository.findByYear(year);
+
+        StepVerifier.create(movieInfoFlux)
+                .assertNext(movieInfo -> {
+                    assertEquals("Batman Begins", movieInfo.getName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void saveMovieInfo() {
         var newMovieInfo = new MovieInfo(null, "Batman Begins 1", 2005, List.of(
                 "Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));

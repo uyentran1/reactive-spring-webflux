@@ -70,6 +70,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     }
 
     @Test
+    void getMovieInfoByYear() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(MOVIE_INFO_URL)
+                        .queryParam("year", 2005)
+                        .build())
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(MovieInfo.class)
+                .hasSize(1);
+    }
+
+    @Test
     void getMovieInfoById() {
         String MOVIE_ID = "abc";
         String MOVIE_NAME = "Dark Knight Rises";

@@ -1,0 +1,7 @@
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: movies_review_service_test
+

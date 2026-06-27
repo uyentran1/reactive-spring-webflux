@@ -83,6 +83,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     }
 
     @Test
+    void getMovieInfoById_notfound() {
+        String MOVIE_ID = "def";
+
+        webTestClient.get()
+                .uri(MOVIE_INFO_URL + "/{id}", MOVIE_ID)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+    @Test
     void addMovieInfo() {
         var movieInfo = new MovieInfo(null, "Batman Begins 1", 2005, List.of(
                 "Christian Bale", "Michael Cane"), LocalDate.parse("2005-06-15"));
@@ -127,6 +138,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
         assertNotNull(persisted);
         assertEquals(MOVIE_NEW_NAME, persisted.getName());
      }
+
+    @Test
+    void updateMovieInfo_notfound() {
+        String MOVIE_ID = "def";
+        var movieInfo = new MovieInfo(null, "ABC", 2012, List.of(
+                "Christian Bale", "Tom Hardy"), LocalDate.parse("2012-07-20"));
+
+        webTestClient.put()
+                .uri(MOVIE_INFO_URL + "/{id}", MOVIE_ID)
+                .bodyValue(movieInfo)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
 
     @Test
     void deleteMovieInfoById() {

@@ -80,6 +80,33 @@ public class ReviewsIntgTest {
     }
 
     @Test
+    void getReviewsByMovieInfoId() {
+        // Test return 2 reviews with movieInfoId = 1L
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(REVIEWS_URL)
+                        .queryParam("movieInfoId", 1L)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .expectBodyList(Review.class)
+                .hasSize(2);
+
+        // Test return 1 review with movieInfoId = 2L
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(REVIEWS_URL)
+                        .queryParam("movieInfoId", 2L)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .expectBodyList(Review.class)
+                .hasSize(1);
+    }
+
+    @Test
     void updateReview() {
         var id = "abc";
 

@@ -1,6 +1,7 @@
 package com.reactivespring.routes;
 
 import com.reactivespring.domain.Review;
+import com.reactivespring.exceptionhandler.GlobalErrorHandler;
 import com.reactivespring.handler.ReviewHandler;
 import com.reactivespring.repository.ReviewRepository;
 import com.reactivespring.router.ReviewRouter;
@@ -11,9 +12,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.HandlerStrategies;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +30,8 @@ public class ReviewsUnitTest {
 
     WebTestClient webTestClient;
 
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
     @Mock
     private ReviewRepository reviewRepository;
 
@@ -33,9 +39,18 @@ public class ReviewsUnitTest {
 
     @BeforeEach
     void setup() {
-        var reviewHandler = new ReviewHandler(reviewRepository);
+        var reviewHandler = new ReviewHandler(validator, reviewRepository);
         var routerFunction = new ReviewRouter().reviewsRoute(reviewHandler);
-        webTestClient = WebTestClient.bindToRouterFunction(routerFunction).build();
+
+        // bindToRouterFunction builds no Spring context, so the @Component GlobalErrorHandler
+        // is not picked up automatically - register it explicitly.
+        var handlerStrategies = HandlerStrategies.builder()
+                .exceptionHandler(new GlobalErrorHandler())
+                .build();
+
+        webTestClient = WebTestClient.bindToRouterFunction(routerFunction)
+                .handlerStrategies(handlerStrategies)
+                .build();
     }
 
     @Test
@@ -58,6 +73,19 @@ public class ReviewsUnitTest {
         assertNotNull(responseReview);
         assertNotNull(responseReview.getReviewId());
         assertEquals("mockId", responseReview.getReviewId());
+    }
+
+    @Test
+    void addReview_validation() {
+        var review = new Review(null, null, "Awesome Movie", -9.0);
+
+        webTestClient.post()
+                .uri(REVIEWS_URL)
+                .bodyValue(review)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .isEqualTo("rating.movieInfoId: must not be null,rating.negative: please pass a non-negative value");
     }
 
     @Test
